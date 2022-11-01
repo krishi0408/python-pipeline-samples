@@ -1,0 +1,56 @@
+inputSet:
+  identifier: "input1"
+  name: "input-1"
+  orgIdentifier: "default"
+  projectIdentifier: "krishikasingh"
+  pipeline:
+    identifier: "pyhtonpipelinesamples"
+    properties:
+      ci:
+        codebase:
+          build:
+            type: "PR"
+            spec:
+              number: "<+trigger.prNumber>"
+          depth: 50
+          prCloneStrategy: "MergeCommit"
+    stages:
+    - stage:
+        identifier: "build_test_and_run"
+        type: "CI"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "Code_compile"
+                type: "Run"
+                spec:
+                  connectorRef: "docker_Quickstart"
+            - step:
+                identifier: "Create_dockerfile"
+                type: "Run"
+                spec:
+                  connectorRef: "docker_Quickstart"
+            - step:
+                identifier: "Build_and_Push_an_image_to_docker_registry"
+                type: "BuildAndPushDockerRegistry"
+                spec:
+                  connectorRef: "docker_Quickstart"
+                  repo: "krishi0408/pythonsample"
+    - stage:
+        identifier: "Integration_test"
+        type: "CI"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "python_server"
+                type: "Background"
+                spec:
+                  connectorRef: "docker_Quickstart"
+                  image: "krishi0408/pythonsample"
+            - step:
+                identifier: "test_connection_to_server"
+                type: "Run"
+                spec:
+                  connectorRef: "docker_Quickstart"
