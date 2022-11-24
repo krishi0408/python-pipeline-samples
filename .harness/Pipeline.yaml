@@ -1,5 +1,4 @@
-  tags: {}
-  properties:
+ properties:
     ci:
       codebase:
         connectorRef: <+input>
@@ -13,10 +12,6 @@
         type: CI
         spec:
           cloneCodebase: true
-          infrastructure:
-            type: KubernetesHosted
-            spec:
-              identifier: k8s-hosted-infra
           execution:
             steps:
               - step:
@@ -57,6 +52,12 @@
                       - latest
                     dockerfile: pythondockerfile
                     optimize: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
         variables:
           - name: container
             type: String
@@ -68,13 +69,11 @@
         type: CI
         spec:
           cloneCodebase: true
-          infrastructure:
-            useFromStage: build_test_and_run
           execution:
             steps:
               - step:
                   type: Background
-                  name: "python server "
+                  name: python server
                   identifier: python_server
                   spec:
                     connectorRef: <+input>
@@ -83,12 +82,18 @@
                     command: python3 ./app.py
               - step:
                   type: Run
-                  name: "test connection to server "
-                  identifier: test_connection_to_server
+                  name: test connection
+                  identifier: test_connection
                   spec:
                     connectorRef: <+input>
                     image: curlimages/curl:7.73.0
                     shell: Sh
                     command: |-
                       sleep 10
-                      curl localhost:5000
+                      curl python_server:5000
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
